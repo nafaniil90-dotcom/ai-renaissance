@@ -263,11 +263,8 @@
   <div class="film-grain"></div>
   <div class="cinematic-vignette"></div>
 
-  <!-- Three.js Световой поток (на ПК) / Статичные часы (на мобильных) -->
-  <canvas id="stage3d" class="fixed inset-0 w-full h-full z-0 pointer-events-auto hidden md:block"></canvas>
-  <div id="mobile-bg-fallback" class="fixed inset-0 w-full h-full z-0 pointer-events-none md:hidden bg-[#07070a] flex items-center justify-center opacity-30">
-    <img src="assets/11_recognition/zhavaranak-watch.png" onerror="this.src='assets/11_recognition/zhavaranak-watch.webp'" class="w-full h-full object-cover mix-blend-screen scale-110" alt="Background" />
-  </div>
+  <!-- Three.js Световой поток (активен на всех устройствах) -->
+  <canvas id="stage3d" class="fixed inset-0 w-full h-full z-0 pointer-events-auto"></canvas>
 
   <!-- Шапка -->
   <header id="site-header" class="fixed top-0 left-0 right-0 z-40 px-5 sm:px-12 py-5 sm:py-7 flex items-center justify-between pointer-events-none transition-opacity duration-300">
@@ -356,7 +353,7 @@
       </div>
     </section>
 
-    <!-- 02 / 5 СЛОВ (с линиями и на мобилках в масштабе) -->
+    <!-- 02 / 5 СЛОВ -->
     <section id="scene-1" class="scene-item absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
       <svg id="pentagram-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10">
         <defs>
@@ -847,7 +844,7 @@
     </div>
   </div>
 
-  <!-- Модальное окно часов «Жаваранак» (исправленное открытие и чистый вид) -->
+  <!-- Модальное окно 360° часов «Жаваранак» -->
   <div id="watch-3d-modal" class="modal-backdrop fixed inset-0 z-[999] items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
     <div class="editorial-border rounded-3xl max-w-4xl w-full p-5 sm:p-8 relative shadow-2xl bg-[#08080c] flex flex-col items-center">
       <button onclick="closeWatch3D()" class="absolute top-5 right-5 w-8 h-8 rounded-full editorial-border flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer z-20">
@@ -1268,66 +1265,64 @@
       }
     }
 
-    /* Three.js Световой поток (активен на десктопе) */
+    /* Three.js Световой поток (активен на всех устройствах) */
     let canvas, scene, camera, renderer, strands, starGeo, starPositions, constellationGeo;
     let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
     let totalSteps = 13;
     let currentStep = 0;
     let isScrollLocked = false;
 
-    if (window.innerWidth >= 768) {
-      canvas = document.getElementById('stage3d');
-      scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x07070a, 0.02);
+    canvas = document.getElementById('stage3d');
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x07070a, 0.02);
 
-      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 0, 30);
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 30);
 
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      window.addEventListener('mousemove', (e) => {
-        mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2.0;
-        mouse.targetY = -(e.clientY / window.innerHeight - 0.5) * 2.0;
-      });
+    window.addEventListener('mousemove', (e) => {
+      mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2.0;
+      mouse.targetY = -(e.clientY / window.innerHeight - 0.5) * 2.0;
+    });
 
-      function createStarTexture() {
-        const c = document.createElement('canvas'); c.width = 64; c.height = 64;
-        const ctx = c.getContext('2d');
-        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
-        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        grad.addColorStop(0.25, 'rgba(103, 232, 249, 0.85)');
-        grad.addColorStop(0.6, 'rgba(139, 92, 246, 0.35)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(32, 32, 30, 0, Math.PI * 2); ctx.fill();
-        return new THREE.CanvasTexture(c);
-      }
-      const starTexture = createStarTexture();
-
-      strands = [];
-      const strandColors = [0x8b5cf6, 0x6366f1, 0x38bdf8, 0xa855f7, 0x06b6d4, 0x4f46e5];
-      for (let s = 0; s < 14; s++) {
-        const linePoints = [];
-        for (let i = 0; i < 60; i++) linePoints.push(new THREE.Vector3(0, 0, 0));
-        const curve = new THREE.CatmullRomCurve3(linePoints);
-        const geom = new THREE.BufferGeometry().setFromPoints(curve.getPoints(120));
-        const mat = new THREE.LineBasicMaterial({ color: strandColors[s % strandColors.length], transparent: true, opacity: 0.38 + Math.random() * 0.45, blending: THREE.AdditiveBlending });
-        scene.add(new THREE.Line(geom, mat));
-        strands.push({ line: scene.children[scene.children.length - 1], radiusOffset: (s / 14) * Math.PI * 2, speedFactor: 0.8 + Math.random() * 0.4 });
-      }
-
-      const starCount = 55;
-      starPositions = [];
-      for (let i = 0; i < starCount; i++) starPositions.push(new THREE.Vector3((Math.random() - 0.5) * 55, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 35 - 5));
-      starGeo = new THREE.BufferGeometry().setFromPoints(starPositions);
-      const starMat = new THREE.PointsMaterial({ color: 0x67e8f9, size: 1.25, map: starTexture, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
-      scene.add(new THREE.Points(starGeo, starMat));
-
-      constellationGeo = new THREE.BufferGeometry();
-      constellationGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(80 * 2 * 3), 3));
-      scene.add(new THREE.LineSegments(constellationGeo, new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending })));
+    function createStarTexture() {
+      const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 30);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      grad.addColorStop(0.25, 'rgba(103, 232, 249, 0.85)');
+      grad.addColorStop(0.6, 'rgba(139, 92, 246, 0.35)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(32, 32, 30, 0, Math.PI * 2); ctx.fill();
+      return new THREE.CanvasTexture(c);
     }
+    const starTexture = createStarTexture();
+
+    strands = [];
+    const strandColors = [0x8b5cf6, 0x6366f1, 0x38bdf8, 0xa855f7, 0x06b6d4, 0x4f46e5];
+    for (let s = 0; s < 14; s++) {
+      const linePoints = [];
+      for (let i = 0; i < 60; i++) linePoints.push(new THREE.Vector3(0, 0, 0));
+      const curve = new THREE.CatmullRomCurve3(linePoints);
+      const geom = new THREE.BufferGeometry().setFromPoints(curve.getPoints(120));
+      const mat = new THREE.LineBasicMaterial({ color: strandColors[s % strandColors.length], transparent: true, opacity: 0.38 + Math.random() * 0.45, blending: THREE.AdditiveBlending });
+      scene.add(new THREE.Line(geom, mat));
+      strands.push({ line: scene.children[scene.children.length - 1], radiusOffset: (s / 14) * Math.PI * 2, speedFactor: 0.8 + Math.random() * 0.4 });
+    }
+
+    const starCount = 55;
+    starPositions = [];
+    for (let i = 0; i < starCount; i++) starPositions.push(new THREE.Vector3((Math.random() - 0.5) * 55, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 35 - 5));
+    starGeo = new THREE.BufferGeometry().setFromPoints(starPositions);
+    const starMat = new THREE.PointsMaterial({ color: 0x67e8f9, size: 1.25, map: starTexture, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+    scene.add(new THREE.Points(starGeo, starMat));
+
+    constellationGeo = new THREE.BufferGeometry();
+    constellationGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(80 * 2 * 3), 3));
+    scene.add(new THREE.LineSegments(constellationGeo, new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending })));
 
     const phaseNames = [
       "01 // НАЧАЛО", "02 // ОСНОВА", "03 // НЕЙРОАВАТАР", "04 // НЕЙРОФОТОСЕССИИ",
@@ -1428,7 +1423,6 @@
       const w = window.innerWidth, h = window.innerHeight;
       const centerX = w * 0.5, centerY = h * 0.5;
       
-      // Адаптивный радиус для мобильных (делаем компактнее, но сохраняем геометрию и линии)
       const isMob = w < 768;
       const radiusX = isMob ? Math.min(w * 0.32, 140) : Math.min(w * 0.38, 420);
       const radiusY = isMob ? Math.min(h * 0.28, 120) : Math.min(h * 0.36, 320);
@@ -1455,54 +1449,51 @@
       requestAnimationFrame(animate);
       const time = clock.getElapsedTime();
 
-      if (window.innerWidth >= 768) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.055;
-        mouse.y += (mouse.targetY - mouse.y) * 0.055;
+      mouse.x += (mouse.targetX - mouse.x) * 0.055;
+      mouse.y += (mouse.targetY - mouse.y) * 0.055;
 
-        const dispersionTarget = (Math.sin(time * 0.7 + currentStep * 0.8) + 1.0) * 0.5;
-        const spread = 0.6 + dispersionTarget * 6.5;
+      const dispersionTarget = (Math.sin(time * 0.7 + currentStep * 0.8) + 1.0) * 0.5;
+      const spread = 0.6 + dispersionTarget * 6.5;
 
-        strands.forEach((s) => {
-          const points = [];
-          for (let i = 0; i < 60; i++) {
-            const t = i / 59;
-            const y = (t - 0.5) * 60;
-            const currentSpread = (1 - Math.sin(t * Math.PI) * 0.75) * spread;
-            const angle = t * 4.0 + s.radiusOffset + time * 0.25 * s.speedFactor;
-            const bendX = mouse.x * Math.sin(t * Math.PI) * 4.8;
-            const bendY = mouse.y * Math.sin(t * Math.PI) * 2.8;
-            points.push(new THREE.Vector3(Math.cos(angle) * currentSpread + bendX, y + bendY, Math.sin(angle) * currentSpread * 0.6 - (t * 20)));
-          }
-          s.line.geometry.dispose();
-          s.line.geometry = new THREE.BufferGeometry().setFromPoints(new THREE.CatmullRomCurve3(points).getPoints(90));
-        });
+      strands.forEach((s) => {
+        const points = [];
+        for (let i = 0; i < 60; i++) {
+          const t = i / 59;
+          const y = (t - 0.5) * 60;
+          const currentSpread = (1 - Math.sin(t * Math.PI) * 0.75) * spread;
+          const angle = t * 4.0 + s.radiusOffset + time * 0.25 * s.speedFactor;
+          const bendX = mouse.x * Math.sin(t * Math.PI) * 4.8;
+          const bendY = mouse.y * Math.sin(t * Math.PI) * 2.8;
+          points.push(new THREE.Vector3(Math.cos(angle) * currentSpread + bendX, y + bendY, Math.sin(angle) * currentSpread * 0.6 - (t * 20)));
+        }
+        s.line.geometry.dispose();
+        s.line.geometry = new THREE.BufferGeometry().setFromPoints(new THREE.CatmullRomCurve3(points).getPoints(90));
+      });
 
-        starPositions.forEach((pos, idx) => {
-          pos.y += Math.sin(time * 0.5 + idx) * 0.015;
-        });
-        starGeo.setFromPoints(starPositions);
+      starPositions.forEach((pos, idx) => {
+        pos.y += Math.sin(time * 0.5 + idx) * 0.015;
+      });
+      starGeo.setFromPoints(starPositions);
 
-        let pairCount = 0;
-        const lineArray = constellationGeo.attributes.position.array;
-        for (let i = 0; i < 55; i++) {
-          for (let j = i + 1; j < 55; j++) {
-            if (starPositions[i].distanceTo(starPositions[j]) < 11.5 && pairCount < 80) {
-              const b = pairCount * 6;
-              lineArray[b] = starPositions[i].x; lineArray[b+1] = starPositions[i].y; lineArray[b+2] = starPositions[i].z;
-              lineArray[b+3] = starPositions[j].x; lineArray[b+4] = starPositions[j].y; lineArray[b+5] = starPositions[j].z;
-              pairCount++;
-            }
+      let pairCount = 0;
+      const lineArray = constellationGeo.attributes.position.array;
+      for (let i = 0; i < 55; i++) {
+        for (let j = i + 1; j < 55; j++) {
+          if (starPositions[i].distanceTo(starPositions[j]) < 11.5 && pairCount < 80) {
+            const b = pairCount * 6;
+            lineArray[b] = starPositions[i].x; lineArray[b+1] = starPositions[i].y; lineArray[b+2] = starPositions[i].z;
+            lineArray[b+3] = starPositions[j].x; lineArray[b+4] = starPositions[j].y; lineArray[b+5] = starPositions[j].z;
+            pairCount++;
           }
         }
-        constellationGeo.attributes.position.needsUpdate = true;
-        constellationGeo.setDrawRange(0, pairCount * 2);
-
-        camera.position.y += (-currentStep * 1.5 - camera.position.y) * 0.05;
-        camera.position.x = mouse.x * 1.2;
-
-        renderer.render(scene, camera);
       }
+      constellationGeo.attributes.position.needsUpdate = true;
+      constellationGeo.setDrawRange(0, pairCount * 2);
 
+      camera.position.y += (-currentStep * 1.5 - camera.position.y) * 0.05;
+      camera.position.x = mouse.x * 1.2;
+
+      renderer.render(scene, camera);
       updatePentagramWords(time);
     }
 
