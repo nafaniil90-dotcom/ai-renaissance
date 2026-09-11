@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <title>AI Renaissance — Студия кинематографичного визуального продакшна | Нейроаватары и AI-сцены</title>
-  <meta name="description" content="AI Renaissance — ведущая студия кинематографичного AI-продакшна. Создаем нейроаватары, AI-фотосессии, интерактивные 3D-сцены, видео и mixed reality для брендов и топ-проектов в Беларуси, России и по всему миру.">
+  <meta name="description" content="AI Renaissance — студия кинематографичного AI-продакшна. Нейроаватары, AI-фотосессии, интерактивные 3D-сцены, видео и mixed reality для брендов и топ-проектов.">
   <meta name="keywords" content="AI Renaissance, лучший креатор Беларуси, AI продакшн Брест, нейроаватары, AI видео, нейрофотосессии, mixed reality, CGI, графика для маркетплейсов, Жаваранак, Луч">
   <meta name="author" content="AI Renaissance">
   <meta name="robots" content="index, follow">
@@ -37,7 +37,9 @@
     "award": "1 место Must Art 2025 за проект часов «Жаваранак» в коллаборации с заводом «Луч»",
     "url": "https://ai-renaissance.art/",
     "sameAs": [
-      "https://t.me/renaissance_ai"
+      "https://t.me/renaissance_ai",
+      "https://www.tiktok.com/@renaissance_ai",
+      "https://www.instagram.com/digital_renaissance_ai"
     ]
   }
   </script>
@@ -430,7 +432,6 @@
       </div>
     </section>
 
-    <!-- Секции направлений -->
     <!-- 03 / НЕЙРОАВАТАР -->
     <section id="scene-2" class="scene-item absolute inset-0 w-full h-full flex items-center justify-center px-4 sm:px-6">
       <div class="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center max-h-[82vh] overflow-y-auto sm:overflow-visible pr-1">
@@ -811,9 +812,9 @@
         <div class="flex items-center gap-6 text-xs tracking-widest text-slate-400">
           <a href="https://t.me/renaissance_ai" target="_blank" rel="noopener noreferrer" class="hover:text-white transition uppercase">Telegram</a>
           <span class="text-white/20">•</span>
-          <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition uppercase">TikTok</a>
+          <a href="https://www.tiktok.com/@renaissance_ai?_r=1&_t=ZS-99chgTtGJh1" target="_blank" rel="noopener noreferrer" class="hover:text-white transition uppercase">TikTok</a>
           <span class="text-white/20">•</span>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition uppercase">Instagram</a>
+          <a href="https://www.instagram.com/digital_renaissance_ai?stkn=MWRvbXFvZnZoM2RqdA==" target="_blank" rel="noopener noreferrer" class="hover:text-white transition uppercase">Instagram</a>
         </div>
       </div>
     </section>
@@ -844,7 +845,22 @@
     </div>
   </div>
 
-  <!-- Модальное окно часов «Жаваранак» (ПК видео, мобильная картинка-дублер) -->
+  <!-- Окно полноразмерного просмотра Lightbox (второй тык) -->
+  <div id="lightbox-modal" class="modal-backdrop fixed inset-0 z-[1000] items-center justify-center p-4 sm:p-8 bg-black/95 backdrop-blur-3xl">
+    <div class="relative max-w-4xl max-h-[85vh] w-auto h-auto flex flex-col items-center justify-center editorial-border rounded-3xl p-3 sm:p-4 bg-[#0a0a0f] shadow-2xl">
+      <button onclick="closeLightbox()" class="absolute -top-3 -right-3 sm:top-4 sm:right-4 w-9 h-9 rounded-full bg-violet-600/90 hover:bg-violet-500 text-white flex items-center justify-center shadow-lg transition cursor-pointer z-30">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div id="lightbox-content" class="w-full h-full flex items-center justify-center overflow-hidden rounded-2xl"></div>
+
+      <div class="mt-3 text-center">
+        <span id="lightbox-title" class="text-xs sm:text-sm text-slate-300 font-light tracking-wide"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно часов «Жаваранак» -->
   <div id="watch-3d-modal" class="modal-backdrop fixed inset-0 z-[999] items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
     <div class="editorial-border rounded-3xl max-w-4xl w-full p-5 sm:p-8 relative shadow-2xl bg-[#08080c] flex flex-col items-center">
       <button onclick="closeWatch3D()" class="absolute top-5 right-5 w-8 h-8 rounded-full editorial-border flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer z-20">
@@ -1078,7 +1094,8 @@
 
       data.items.forEach(item => {
         const card = document.createElement('div');
-        card.className = 'aspect-[3/4] rounded-xl bg-white/5 border border-white/10 overflow-hidden relative group';
+        card.className = 'aspect-[3/4] rounded-xl bg-white/5 border border-white/10 overflow-hidden relative group cursor-pointer hover:border-violet-500/70 transition-all';
+        card.onclick = () => openLightbox(item);
 
         if (item.type === 'video') {
           card.innerHTML = `
@@ -1086,12 +1103,18 @@
             <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex items-end p-2.5 pointer-events-none">
               <span class="text-[10px] text-white font-medium">${item.title}</span>
             </div>
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity pointer-events-none">
+              <div class="w-7 h-7 rounded-full bg-violet-600/80 flex items-center justify-center text-white"><i data-lucide="maximize-2" class="w-3.5 h-3.5"></i></div>
+            </div>
           `;
         } else {
           card.innerHTML = `
             <img src="${item.src}" onerror="this.style.display='none'" class="w-full h-full object-cover" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex items-end p-2.5 pointer-events-none">
               <span class="text-[10px] text-white font-medium">${item.title}</span>
+            </div>
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity pointer-events-none">
+              <div class="w-7 h-7 rounded-full bg-violet-600/80 flex items-center justify-center text-white"><i data-lucide="maximize-2" class="w-3.5 h-3.5"></i></div>
             </div>
           `;
         }
@@ -1104,6 +1127,36 @@
 
     function closeGallery() {
       document.getElementById('gallery-modal').classList.remove('open');
+    }
+
+    /* ДВУХУРОВНЕВЫЙ LIGHTBOX (Второй тык по работе) */
+    function openLightbox(item) {
+      const modal = document.getElementById('lightbox-modal');
+      const content = document.getElementById('lightbox-content');
+      const title = document.getElementById('lightbox-title');
+
+      title.textContent = item.title;
+      content.innerHTML = '';
+
+      if (item.type === 'video') {
+        content.innerHTML = `
+          <video src="${item.src}" autoplay loop muted playsinline controls class="max-w-full max-h-[72vh] rounded-2xl object-contain shadow-2xl"></video>
+        `;
+      } else {
+        content.innerHTML = `
+          <img src="${item.src}" class="max-w-full max-h-[72vh] rounded-2xl object-contain shadow-2xl" alt="${item.title}" />
+        `;
+      }
+
+      lucide.createIcons();
+      modal.classList.add('open');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      const content = document.getElementById('lightbox-content');
+      modal.classList.remove('open');
+      if (content) content.innerHTML = '';
     }
 
     function openModal(preselect = '') {
@@ -1257,6 +1310,7 @@
 
     document.getElementById('contact-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('contact-modal')) closeModal(); });
     document.getElementById('gallery-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('gallery-modal')) closeGallery(); });
+    document.getElementById('lightbox-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('lightbox-modal')) closeLightbox(); });
     document.getElementById('watch-3d-modal').addEventListener('click', (e) => { if (e.target === document.getElementById('watch-3d-modal')) closeWatch3D(); });
 
     async function handleFormSubmit(e) {
@@ -1391,7 +1445,28 @@
     function nextStep() { if (currentStep < totalSteps - 1) goToStep(currentStep + 1); }
     function prevStep() { if (currentStep > 0) goToStep(currentStep - 1); }
 
+    /* УМНАЯ ПРОВЕРКА СКРОЛЛА (не дает переключать слайд, пока не долистан контент в "Подходе" или галерее) */
+    function getScrollableParent(el) {
+      while (el && el !== document.body) {
+        const style = window.getComputedStyle(el);
+        const overflowY = style.overflowY;
+        if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 4) {
+          return el;
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+
     window.addEventListener('wheel', (e) => {
+      const scrollable = getScrollableParent(e.target);
+      if (scrollable) {
+        const isAtBottom = Math.ceil(scrollable.scrollTop + scrollable.clientHeight) >= scrollable.scrollHeight - 2;
+        const isAtTop = scrollable.scrollTop <= 2;
+        if (e.deltaY > 0 && !isAtBottom) return; // скроллим внутри контейнера вниз
+        if (e.deltaY < 0 && !isAtTop) return;    // скроллим внутри контейнера вверх
+      }
+
       e.preventDefault();
       if (isScrollLocked || Math.abs(e.deltaY) < 15) return;
       if (e.deltaY > 0) nextStep(); else prevStep();
@@ -1399,11 +1474,27 @@
     }, { passive: false });
 
     let touchY = 0;
-    window.addEventListener('touchstart', (e) => { if (e.touches.length > 0) touchY = e.touches[0].clientY; }, { passive: true });
+    let touchTarget = null;
+    window.addEventListener('touchstart', (e) => { 
+      if (e.touches.length > 0) {
+        touchY = e.touches[0].clientY;
+        touchTarget = e.target;
+      }
+    }, { passive: true });
+
     window.addEventListener('touchend', (e) => {
       if (isScrollLocked || e.changedTouches.length === 0) return;
       const diff = touchY - e.changedTouches[0].clientY;
-      if (Math.abs(diff) > 35) {
+      
+      const scrollable = getScrollableParent(touchTarget);
+      if (scrollable) {
+        const isAtBottom = Math.ceil(scrollable.scrollTop + scrollable.clientHeight) >= scrollable.scrollHeight - 2;
+        const isAtTop = scrollable.scrollTop <= 2;
+        if (diff > 0 && !isAtBottom) return; // скроллим пальцем вниз
+        if (diff < 0 && !isAtTop) return;    // скроллим пальцем вверх
+      }
+
+      if (Math.abs(diff) > 38) {
         if (diff > 0) nextStep(); else prevStep();
         isScrollLocked = true; setTimeout(() => { isScrollLocked = false; }, 550);
       }
@@ -1412,7 +1503,7 @@
     window.addEventListener('keydown', (e) => {
       if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); nextStep(); }
       else if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prevStep(); }
-      else if (e.key === 'Escape') { closeModal(); closeGallery(); closeWatch3D(); }
+      else if (e.key === 'Escape') { closeModal(); closeLightbox(); closeGallery(); closeWatch3D(); }
     });
 
     const pWordElements = [document.getElementById('pnode-0'), document.getElementById('pnode-1'), document.getElementById('pnode-2'), document.getElementById('pnode-3'), document.getElementById('pnode-4')];
